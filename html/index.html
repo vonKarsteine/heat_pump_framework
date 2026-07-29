@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R718 Two-Stage High-Temperature Heat Pump — Interactive Companion</title>
+<style>
+:root{
+  --bg:#f7f8fa; --panel:#ffffff; --ink:#1c2330; --muted:#5b6572; --line:#dde2e9;
+  --accent:#0b6e99; --accent2:#b34700; --good:#1a7f37; --warn:#b58900; --bad:#c0392b;
+  --chip:#eef2f6; --code:#f0f3f7; --hot:#c0392b; --cold:#2471a3; --state:#1a7f37;
+  --domefill:rgba(11,110,153,.08);
+}
+html[data-theme="dark"]{
+  --bg:#12161d; --panel:#1a2029; --ink:#e6eaf0; --muted:#9aa5b1; --line:#2a3340;
+  --accent:#4fb3dd; --accent2:#e8925a; --good:#57c07a; --warn:#d9b545; --bad:#e06c5d;
+  --chip:#232b36; --code:#20272f; --hot:#e06c5d; --cold:#5da3d5; --state:#57c07a;
+  --domefill:rgba(79,179,221,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px}
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;
+  padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+header .brand{font-weight:650;font-size:16px}
+header .brand .sub{font-weight:400;color:var(--muted);font-size:13px;margin-left:8px}
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.badge.ok{color:var(--good);border-color:var(--good)}
+.badge.fail{color:var(--bad);border-color:var(--bad)}
+button{font:inherit;font-size:13px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);max-width:1280px;margin:0 auto;gap:0 26px;padding:0 18px}
+nav#sidebar{position:sticky;top:56px;align-self:start;height:calc(100vh - 56px);overflow:auto;padding:18px 0 40px}
+nav#sidebar a{display:block;padding:6px 10px;margin:1px 0;color:var(--muted);text-decoration:none;
+  border-left:2px solid transparent;font-size:13.5px;border-radius:0 6px 6px 0}
+nav#sidebar a:hover{color:var(--accent)}
+nav#sidebar a.active{color:var(--accent);border-left-color:var(--accent);background:var(--chip)}
+main{min-width:0;padding:20px 0 80px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 26px;margin:0 0 22px}
+h1{font-size:22px;margin:4px 0 10px}
+h2{font-size:18px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+h3{font-size:15px;margin:18px 0 8px;color:var(--accent)}
+p{margin:8px 0}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+a{color:var(--accent)}
+code,.mono{font-family:Consolas,"Cascadia Mono",Menlo,monospace;font-size:.92em;background:var(--code);padding:1px 5px;border-radius:5px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+th{background:var(--chip);font-weight:600}
+tr.hl td{background:var(--domefill)}
+.tablewrap{overflow-x:auto}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:118px}
+.chip .k{font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+.chip .v{font-size:17px;font-weight:650;margin-top:2px}
+.chip .u{font-size:11px;color:var(--muted)}
+.chip.warn .v{color:var(--warn)} .chip.bad .v{color:var(--bad)} .chip.good .v{color:var(--good)}
+.warnbox{border-left:3px solid var(--warn);background:var(--chip);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:13.5px}
+.warnbox.bad{border-left-color:var(--bad)}
+.eq{background:var(--code);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:15px;overflow-x:auto;white-space:nowrap}
+.eq .tag{float:right;color:var(--muted);font-size:12px;margin-left:14px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px}
+.frac>span{display:block;padding:0 4px}
+.frac>span:first-child{border-bottom:1px solid currentColor}
+var{font-style:italic;font-family:Georgia,"Times New Roman",serif}
+sub,sup{font-size:.72em}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 18px;margin:12px 0}
+.ctl{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.ctl label{color:var(--muted)}
+.ctl .row{display:flex;align-items:center;gap:8px}
+.ctl input[type=range]{flex:1;accent-color:var(--accent)}
+.ctl output{min-width:74px;text-align:right;font-family:Consolas,monospace;font-size:13px}
+.ctl input[type=number]{width:80px;font:inherit;background:var(--code);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+.togglerow{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.togglerow label{display:flex;gap:6px;align-items:center;font-size:13.5px;cursor:pointer}
+svg text{font-family:inherit}
+.svgwrap{overflow-x:auto;margin:8px 0}
+figure{margin:12px 0}
+figcaption{font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:4px}
+.legend span::before{content:"—";font-weight:700;margin-right:5px}
+.leg-main::before{color:var(--accent)} .leg-inj::before{color:var(--accent2)} .leg-dome::before{color:var(--muted)}
+.arch{list-style:none;padding:0;margin:10px 0}
+.arch li{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0;background:var(--chip)}
+.arch b{color:var(--accent)}
+.sp text{cursor:default}
+.sp:hover text.lbl,.sp.hl text.lbl{font-weight:700;fill:var(--accent2)}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:10px 0 30px}
+.notice{border-left:3px solid var(--accent);background:var(--chip);padding:8px 12px;border-radius:6px;font-size:13.5px;margin:10px 0}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav#sidebar{display:none}}
+@media print{
+  header .hdr-right,nav#sidebar,.controls,.togglerow,button{display:none!important}
+  .layout{grid-template-columns:1fr}
+  body{background:#fff;color:#000}
+  section{border:none;page-break-inside:avoid;padding:8px 0}
+  :root{--bg:#fff;--panel:#fff;--ink:#000;--muted:#444;--line:#bbb;--chip:#f2f2f2;--code:#f4f4f4}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">R718 Two-Stage High-Temperature Heat Pump<span class="sub">interactive design companion · water as refrigerant · 10&nbsp;°C → 125&nbsp;°C</span></div>
+  <div class="hdr-right">
+    <span id="selftest" class="badge" title="IAPWS-IF97 property engine verified against the official release verification tables on every page load">IF97 self-test…</span>
+    <button id="themeBtn" title="Toggle light/dark">◐ theme</button>
+    <button onclick="window.print()">Print</button>
+  </div>
+</header>
+<div class="layout">
+<nav id="sidebar">
+  <a href="#overview">1 · Overview</a>
+  <a href="#schematic">2 · System schematic</a>
+  <a href="#model">3 · Model summary</a>
+  <a href="#calculator">4 · Cycle calculator</a>
+  <a href="#tsdiagram">5 · T–s diagram</a>
+  <a href="#control">6 · Control design</a>
+  <a href="#dynamics">7 · Dynamics demo</a>
+  <a href="#prototype">8 · Prototype</a>
+  <a href="#glossary">9 · Glossary &amp; refs</a>
+</nav>
+<main>
+
+<section id="overview">
+<h1>Two-stage water-vapor (R718) high-temperature heat pump</h1>
+<p>This page is the interactive companion to the project's markdown documents (<code>docs/01…10</code>).
+It models a <b>two-stage vapor-compression heat pump using water (H₂O, R718)</b> as the working fluid:
+an evaporator (蒸发器) absorbs heat from a ~20 °C source at a deep-vacuum evaporating pressure,
+two compressor stages (低压/高压压缩机) with an <b>economizer</b> (经济器) vapor-injection stage in between
+lift it by a pressure ratio of ≈ 190, and the condenser (冷凝器) delivers heat to process water heated from
+115 °C to ≈ 120 °C. A recuperator (回热器) dries the suction vapor; a main and a secondary expansion valve
+(主/次膨胀阀) close the loop.</p>
+<div class="chips">
+  <div class="chip"><div class="k">Evaporating</div><div class="v">10 °C</div><div class="u">P₁ = 1.228 kPa (vacuum!)</div></div>
+  <div class="chip"><div class="k">Condensing</div><div class="v">125 °C</div><div class="u">P₄ = 232.2 kPa</div></div>
+  <div class="chip"><div class="k">Pressure ratio</div><div class="v">≈ 189</div><div class="u">≈ 13.8 per stage</div></div>
+  <div class="chip"><div class="k">Suction volume</div><div class="v">106 m³/kg</div><div class="u">→ ~1.3 m³/s @ 50 kW</div></div>
+  <div class="chip"><div class="k">Carnot COP</div><div class="v">3.46</div><div class="u">realistic ≈ 1.6–1.9</div></div>
+</div>
+<p><b>Why water?</b> GWP = 0, ODP = 0, non-flammable, free, critical point at 373.9 °C — ideal above 100 °C where
+halocarbons run out of headroom. <b>Why is it hard?</b> Deep vacuum on the cold side (1 % of atmospheric —
+every 100 Pa of suction-line pressure drop costs ≈ 1.2 K of lift), enormous suction volume flows, and
+steam's "drying" isentropes: compressing saturated 10 °C vapor at ratio 13.8 lands near
+<b>261 °C isentropic / ≈ 370–390 °C real</b> — so interstage desuperheating (economizer injection <i>plus</i>
+liquid spray) is not an optimization but a feasibility requirement.</p>
+<div class="notice"><b>State numbering.</b> The original task figure labels two different points "T10".
+This project renumbers the evaporator inlet as <b>state 11</b>; economizer vapor outlet keeps state 10.
+Loop: 1 → 2 (recuperator) → 3 (LP discharge) → 4 (after injection/spray mixing) → 5 (HP discharge) →
+6 (condensate) → 7 (economizer out, branch tap) → 8 (recuperator out) → 11 (evaporator in);
+branch 7 → 9 (secondary valve) → 10 (injection vapor).</div>
+<h3>Input-variable classes (per the task) → model roles</h3>
+<div class="tablewrap"><table>
+<tr><th>Task class</th><th>Examples</th><th>Role in the model</th></tr>
+<tr><td>1 · Fixed component parameters (无法改变)</td><td>η<sub>is</sub>, η<sub>vol</sub>, η<sub>mech</sub>, displacement, motor curves, sensor/actuator limits</td><td>Constants / performance maps</td></tr>
+<tr><td>2 · Design-stage choices (设计阶段可选定)</td><td>HX areas &amp; geometry, valve K<sub>v</sub>, capacity, displacement ratio</td><td>Optimization variables, frozen after build</td></tr>
+<tr><td>3 · Runtime manipulated (运行中可调控)</td><td>Speeds N₁ N₂, valve openings u<sub>mv</sub> u<sub>iv</sub> u<sub>spray</sub>, pump flows</td><td>Control inputs <b>u</b>(t)</td></tr>
+<tr><td>— · Boundary conditions</td><td>Source/process inlet temperatures, demanded load</td><td>Disturbances <b>d</b>(t)</td></tr>
+</table></div>
+</section>
+
+<section id="schematic">
+<h2>2 · System schematic (live values)</h2>
+<p class="small muted">Layout mirrors the task figure (condenser top, evaporator bottom, compressors right,
+economizer center, valves left) with the corrected state numbering. Green labels update live from the calculator;
+hover a state to highlight its row in the state table.</p>
+<div class="svgwrap">
+<svg id="schemsvg" viewBox="0 0 880 650" width="100%" style="max-width:880px">
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+<marker id="arrh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 z" fill="var(--hot)"/></marker>
+<marker id="arrc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 z" fill="var(--cold)"/></marker>
+</defs>
+<!-- condenser -->
+<rect x="270" y="42" width="330" height="62" rx="14" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+<text x="435" y="30" text-anchor="middle" font-size="13" fill="var(--ink)" font-weight="600">Condenser 冷凝器 (P₄)</text>
+<line x1="150" y1="73" x2="700" y2="73" stroke="var(--hot)" stroke-width="2.4" stroke-dasharray="7 4" marker-end="url(#arrh)"/>
+<text x="146" y="66" text-anchor="end" font-size="12" fill="var(--hot)">115 °C process water</text>
+<text x="706" y="66" font-size="12" fill="var(--hot)">≈120 °C</text>
+<!-- evaporator -->
+<rect x="270" y="540" width="330" height="62" rx="14" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+<text x="435" y="632" text-anchor="middle" font-size="13" fill="var(--ink)" font-weight="600">Evaporator 蒸发器 (P₁ ≈ 1 % atm)</text>
+<line x1="150" y1="572" x2="700" y2="572" stroke="var(--cold)" stroke-width="2.4" stroke-dasharray="7 4" marker-end="url(#arrc)"/>
+<text x="146" y="565" text-anchor="end" font-size="12" fill="var(--cold)">20 °C source water</text>
+<text x="706" y="565" font-size="12" fill="var(--cold)">≈15 °C</text>
+<!-- compressors -->
+<circle cx="705" cy="185" r="26" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+<text x="705" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">C2</text>
+<text x="742" y="182" font-size="12" fill="var(--muted)">HP 高压</text>
+<circle cx="705" cy="345" r="26" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+<text x="705" y="350" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">C1</text>
+<text x="742" y="342" font-size="12" fill="var(--muted)">LP 低压</text>
+<!-- economizer -->
+<rect x="300" y="232" width="150" height="64" rx="10" fill="var(--domefill)" stroke="var(--ink)" stroke-width="1.4"/>
+<text x="375" y="222" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Economizer 经济器</text>
+<!-- recuperator two-box -->
+<rect x="460" y="430" width="60" height="45" rx="8" fill="var(--domefill)" stroke="var(--ink)" stroke-width="1.2"/>
+<text x="490" y="457" text-anchor="middle" font-size="10.5" fill="var(--ink)">REC·h</text>
+<rect x="600" y="470" width="60" height="40" rx="8" fill="var(--domefill)" stroke="var(--ink)" stroke-width="1.2"/>
+<text x="630" y="494" text-anchor="middle" font-size="10.5" fill="var(--ink)">REC·c</text>
+<line x1="520" y1="452" x2="600" y2="490" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1.2"/>
+<text x="536" y="483" font-size="10.5" fill="var(--muted)">recuperator 回热器</text>
+<!-- valves -->
+<path d="M240,490 l20,10 l-20,10 z M260,490 l-20,10 l20,10 z" fill="none" stroke="var(--ink)" stroke-width="1.4"/>
+<text x="200" y="486" font-size="11.5" fill="var(--ink)">main valve</text>
+<text x="204" y="522" font-size="10.5" fill="var(--muted)">主膨胀阀 u_mv</text>
+<path d="M440,300 l16,8 l-16,8 z M456,300 l-16,8 l16,8 z" fill="none" stroke="var(--ink)" stroke-width="1.4"/>
+<text x="440" y="336" font-size="10.5" fill="var(--muted)">次膨胀阀 u_iv</text>
+<!-- vapor path: evap -> REC.c -> C1 -->
+<polyline points="600,556 630,556 630,510" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="630,470 630,385 692,385 705,371" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+<!-- C1 -> mix -> C2 -->
+<polyline points="705,319 705,266" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+<circle cx="705" cy="258" r="4" fill="var(--accent)"/>
+<polyline points="705,250 705,211" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+<!-- C2 -> condenser -->
+<polyline points="705,159 705,90 604,90" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+<!-- condensate 6 -> eco -->
+<polyline points="270,88 190,88 190,268 296,268" fill="none" stroke="var(--accent2)" stroke-width="2" marker-end="url(#arr)"/>
+<!-- eco hot out 7, split -->
+<polyline points="450,268 520,268" fill="none" stroke="var(--accent2)" stroke-width="2"/>
+<circle cx="520" cy="268" r="4" fill="var(--accent2)"/>
+<!-- main liquid down through REC.h to main valve -->
+<polyline points="520,268 520,410 490,410 490,430" fill="none" stroke="var(--accent2)" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="490,475 490,500 262,500" fill="none" stroke="var(--accent2)" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="238,500 220,500 220,556 268,556" fill="none" stroke="var(--accent2)" stroke-width="2" marker-end="url(#arr)"/>
+<!-- branch to secondary valve -> eco cold in 9 -->
+<polyline points="520,268 560,268 560,308 458,308" fill="none" stroke="var(--accent2)" stroke-width="1.8" marker-end="url(#arr)"/>
+<polyline points="438,308 375,308 375,298" fill="none" stroke="var(--accent2)" stroke-width="1.8" marker-end="url(#arr)"/>
+<!-- eco cold out 10 -> mix -->
+<polyline points="375,232 375,205 560,205 560,258 697,258" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-dasharray="6 3" marker-end="url(#arr)"/>
+<!-- spray line -->
+<g id="sprayline"><polyline points="540,268 640,268 640,272 700,272" fill="none" stroke="var(--accent2)" stroke-width="1.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<text x="612" y="286" font-size="10.5" fill="var(--accent2)">spray w_s 喷液</text></g>
+<!-- state labels (live) -->
+<g class="sp" data-st="1"><text class="lbl" x="636" y="534" font-size="11.5" fill="var(--state)">① <tspan id="sv1"></tspan></text></g>
+<g class="sp" data-st="2"><text class="lbl" x="638" y="428" font-size="11.5" fill="var(--state)">② <tspan id="sv2"></tspan></text></g>
+<g class="sp" data-st="3"><text class="lbl" x="714" y="300" font-size="11.5" fill="var(--state)">③ <tspan id="sv3"></tspan></text></g>
+<g class="sp" data-st="4"><text class="lbl" x="714" y="236" font-size="11.5" fill="var(--state)">④ <tspan id="sv4"></tspan></text></g>
+<g class="sp" data-st="5"><text class="lbl" x="712" y="122" font-size="11.5" fill="var(--state)">⑤ <tspan id="sv5"></tspan></text></g>
+<g class="sp" data-st="6"><text class="lbl" x="196" y="168" font-size="11.5" fill="var(--state)">⑥ <tspan id="sv6"></tspan></text></g>
+<g class="sp" data-st="7"><text class="lbl" x="458" y="258" font-size="11.5" fill="var(--state)">⑦ <tspan id="sv7"></tspan></text></g>
+<g class="sp" data-st="8"><text class="lbl" x="498" y="494" font-size="11.5" fill="var(--state)">⑧ <tspan id="sv8"></tspan></text></g>
+<g class="sp" data-st="9"><text class="lbl" x="384" y="322" font-size="11.5" fill="var(--state)">⑨ <tspan id="sv9"></tspan></text></g>
+<g class="sp" data-st="10"><text class="lbl" x="390" y="199" font-size="11.5" fill="var(--state)">⑩ <tspan id="sv10"></tspan></text></g>
+<g class="sp" data-st="11"><text class="lbl" x="150" y="534" font-size="11.5" fill="var(--state)">⑪ <tspan id="sv11"></tspan></text></g>
+</svg>
+</div>
+</section>
+
+<section id="model">
+<h2>3 · Model summary</h2>
+<p class="small muted">Full derivations live in docs 02–07; these are the closure equations the calculator implements.</p>
+<h3>Properties — IAPWS-IF97 (Regions 4, 2, 1)</h3>
+<p>Saturation both ways (R4), superheated-vapor Gibbs energy (R2: <var>h</var>, <var>s</var>, <var>v</var>, <var>c<sub>p</sub></var> consistently from one function), compressed liquid (R1).
+The engine below implements the official coefficients and <b>self-tests against the IF97 release verification tables on load</b> (badge, top right).</p>
+<h3>Compressors</h3>
+<div class="eq"><span class="tag">(C-1)</span><var>ṁ</var> = η<sub>vol</sub> · ρ<sub>suc</sub> · V<sub>disp</sub> · N&nbsp;&nbsp;&nbsp;&nbsp;
+<span class="tag" style="float:none">(C-2)</span>&nbsp;<var>h</var><sub>out</sub> = <var>h</var><sub>in</sub> + <span class="frac"><span><var>h</var>(P<sub>out</sub>, s<sub>in</sub>) − <var>h</var><sub>in</sub></span><span>η<sub>is</sub></span></span></div>
+<h3>Economizer + injection ratio (branch taps at 7, h₉ = h₇)</h3>
+<div class="eq"><span class="tag">(E-1)</span>ṁ<sub>c</sub>(<var>h</var>₆ − <var>h</var>₇) = ṁ<sub>inj</sub>(<var>h</var>₁₀ − <var>h</var>₉) &nbsp;⇒&nbsp; r = <span class="frac"><span><var>h</var>₆ − <var>h</var>₇</span><span><var>h</var>₁₀ − <var>h</var>₆</span></span> (no spray)</div>
+<h3>Interstage mixing — an enthalpy balance, never a temperature average</h3>
+<div class="eq"><span class="tag">(M-1)</span>ṁ<sub>e</sub><var>h</var>₃ + ṁ<sub>inj</sub><var>h</var>₁₀ + ṁ<sub>spray</sub><var>h</var>₇ = ṁ<sub>c</sub><var>h</var>₄,&nbsp;&nbsp; ṁ<sub>c</sub> = ṁ<sub>e</sub>(1 + r + w<sub>s</sub>)</div>
+<p class="small">With vapor injection alone (r ≈ 0.13) the mix cools only ≈ 30 K; the spray term w<sub>s</sub> ≈ 0.25–0.28 brings state 4 to
+T<sub>sat</sub>(P<sub>int</sub>) + 15 K and is solved jointly with r from the two linear balances (doc 05 §5.5).</p>
+<h3>Recuperator (both sides carry ṁ<sub>e</sub>; split is upstream at state 7)</h3>
+<div class="eq"><span class="tag">(R-1)</span><var>h</var>₂ − <var>h</var>₁ = <var>h</var>₇ − <var>h</var>₈ = ε<sub>rec</sub> · c<sub>p,v</sub> · (T₇ − T₁)</div>
+<h3>Valves &amp; flash quality</h3>
+<div class="eq"><span class="tag">(V-1)</span><var>h</var>₁₁ = <var>h</var>₈,&nbsp;&nbsp; x₁₁ = <span class="frac"><span><var>h</var>₈ − <var>h</var><sub>f</sub>(T<sub>e</sub>)</span><span><var>h</var><sub>fg</sub>(T<sub>e</sub>)</span></span>&nbsp;&nbsp;(0.186 saturated → ≈ 0.08 subcooled; &gt;99.9 % vapor <i>by volume</i>)</div>
+<h3>Performance</h3>
+<div class="eq"><span class="tag">(P-1)</span>COP<sub>gas</sub> = <span class="frac"><span>ṁ<sub>c</sub>(<var>h</var>₅ − <var>h</var>₆)</span><span>ṁ<sub>e</sub>(<var>h</var>₃ − <var>h</var>₂) + ṁ<sub>c</sub>(<var>h</var>₅ − <var>h</var>₄)</span></span>,&nbsp;
+COP<sub>el</sub> = η<sub>drive</sub> · COP<sub>gas</sub>,&nbsp; COP<sub>Carnot</sub> = <span class="frac"><span>T<sub>c</sub></span><span>T<sub>c</sub> − T<sub>e</sub></span></span></div>
+<p class="small">Energy closure Q̇<sub>cond</sub> = Q̇<sub>evap</sub> + Ẇ₁ + Ẇ₂ holds identically if every component balance holds
+(telescoping proof, doc 06 §6.8) — the calculator displays the numerical residual as a live check.
+<b>P<sub>int</sub> note:</b> at runtime the intermediate pressure is <i>emergent</i> (intersection of the two compressor characteristics);
+specifying it here is design-mode reasoning (doc 06 §6.7).</p>
+</section>
+
+<section id="calculator">
+<h2>4 · Interactive cycle calculator</h2>
+<p class="small muted">Design-mode march (doc 06 §6.7): specify the thermodynamic anchors, the solver walks
+1 → 2 → 3 → {r, w<sub>s</sub>} → 4 → 5 → 6 → 7 → 8 → 11 with IF97 properties and 1-D bisection inversions only.
+Defaults = the project's nominal anchor. <b>All quoted COP values are electrical</b> (gas COP × η<sub>drive</sub>).</p>
+<div class="controls">
+  <div class="ctl"><label>Evaporating temperature T<sub>e</sub> (source ≈ 20 °C)</label><div class="row"><input type="range" id="inTe" min="2" max="25" step="0.5" value="10"><output id="outTe"></output></div></div>
+  <div class="ctl"><label>Condensing temperature T<sub>c</sub> (supply 120 °C ⇒ ≥ 123 °C)</label><div class="row"><input type="range" id="inTc" min="110" max="135" step="0.5" value="125"><output id="outTc"></output></div></div>
+  <div class="ctl"><label>Intermediate pressure P<sub>int</sub></label><div class="row"><input type="range" id="inPi" min="5" max="60" step="0.5" value="17"><output id="outPi"></output></div></div>
+  <div class="ctl"><label>Heating capacity Q̇<sub>cond</sub></label><div class="row"><input type="range" id="inQ" min="10" max="100" step="1" value="50"><output id="outQ"></output></div></div>
+  <div class="ctl"><label>Isentropic efficiency η<sub>is,1</sub> (stage 1)</label><div class="row"><input type="range" id="inE1" min="0.5" max="0.85" step="0.01" value="0.70"><output id="outE1"></output></div></div>
+  <div class="ctl"><label>Isentropic efficiency η<sub>is,2</sub> (stage 2)</label><div class="row"><input type="range" id="inE2" min="0.5" max="0.85" step="0.01" value="0.70"><output id="outE2"></output></div></div>
+  <div class="ctl"><label>Evaporator exit superheat ΔT<sub>sh</sub></label><div class="row"><input type="range" id="inSH" min="0" max="10" step="0.5" value="3"><output id="outSH"></output></div></div>
+  <div class="ctl"><label>Recuperator effectiveness ε<sub>rec</sub></label><div class="row"><input type="range" id="inER" min="0" max="0.9" step="0.05" value="0.15"><output id="outER"></output></div></div>
+  <div class="ctl"><label>Economizer approach ΔT<sub>ec</sub></label><div class="row"><input type="range" id="inDTec" min="2" max="15" step="0.5" value="5"><output id="outDTec"></output></div></div>
+  <div class="ctl"><label>Drive efficiency η<sub>drive</sub> = η<sub>mech</sub>·η<sub>mot</sub>·η<sub>VFD</sub></label><div class="row"><input type="range" id="inED" min="0.75" max="0.98" step="0.01" value="0.88"><output id="outED"></output></div></div>
+</div>
+<div class="togglerow">
+  <label><input type="checkbox" id="inEco" checked> Economizer / vapor injection (经济器补气)</label>
+  <label><input type="checkbox" id="inSpray" checked> Interstage liquid spray to T<sub>sat</sub>+15 K (喷液降温)</label>
+  <button id="btnGeo">Set P<sub>int</sub> = √(P₁·P₄)</button>
+  <button id="btnReset">Reset to nominal</button>
+</div>
+<div id="warnings"></div>
+<div class="chips" id="kpis"></div>
+<h3>State-point table</h3>
+<div class="tablewrap"><table id="stateTable">
+<thead><tr><th>State</th><th>Location</th><th>T (°C)</th><th>P (kPa)</th><th>h (kJ/kg)</th><th>s (kJ/kg·K)</th><th>v (m³/kg)</th><th>ṁ (kg/s)</th></tr></thead>
+<tbody></tbody>
+</table></div>
+<p class="small muted" id="flowline"></p>
+</section>
+
+<section id="tsdiagram">
+<h2>5 · T–s diagram (live)</h2>
+<p class="small muted">The saturation dome is computed from IF97 at load; the cycle polyline updates with the sliders.
+Note the huge superheat triangle — the compression path climbs hundreds of kelvin above the dome, the visual
+signature of R718's "drying" isentropes and the reason interstage spray desuperheating is mandatory.</p>
+<figure>
+<div class="svgwrap"><svg id="tssvg" viewBox="0 0 800 470" width="100%" style="max-width:800px"></svg></div>
+<div class="legend"><span class="leg-dome">saturation dome</span><span class="leg-main">main cycle 1→2→3→4→5→6→7→8→11</span><span class="leg-inj">injection branch 7→9→10→4 (+ spray 7→4)</span></div>
+</figure>
+</section>
+
+<section id="control">
+<h2>6 · Control design summary</h2>
+<p class="small muted">Full treatment in doc 09; the dynamic model behind it in doc 08.</p>
+<h3>Controlled variables, constraints, pairing</h3>
+<div class="tablewrap"><table>
+<tr><th>Controlled variable</th><th>Target / limit</th><th>Paired manipulated input</th><th>Loop character</th></tr>
+<tr><td>Process supply temperature T<sub>proc,out</sub></td><td>120 °C ± 0.5 K</td><td>Compressor speed (common capacity command, N₂-led)</td><td>Slow: τ ≈ 60–300 s + transport delay</td></tr>
+<tr><td>Evaporator superheat SH₁</td><td>3–8 K (droplet protection)</td><td>Main valve u<sub>mv</sub></td><td>Fast: τ ≈ 5–20 s, possible inverse response (RHP zero)</td></tr>
+<tr><td>Intermediate pressure P<sub>int</sub></td><td>setpoint 17–20 kPa (COP-flat, T₅-constrained)</td><td>Speed ratio N₁/N₂ (primary), u<sub>iv</sub> trim</td><td>Mid: τ ≈ 2–10 s; P<sub>int</sub> itself is <i>emergent</i></td></tr>
+<tr><td>HP discharge temperature T₅</td><td>≤ 250 °C continuous (override)</td><td>u<sub>spray</sub> first, then capacity cut</td><td>Protective high-select</td></tr>
+<tr><td>Evaporating pressure P₁</td><td>≥ 0.9 kPa (triple point 0.611 kPa + margin)</td><td>Low-select cuts N₁</td><td>Protective</td></tr>
+</table></div>
+<h3>Layered architecture</h3>
+<ul class="arch">
+<li><b>L0 · Interlocks (hardwired):</b> high T₅, high P₄/PRV, loss of water flow, freeze guard (source outlet ≥ 3 °C — R718 cannot evaporate below 0.01 °C), E-stop. Latching, manual reset.</li>
+<li><b>L1 · Regulatory PI/PID:</b> SIMC/IMC tunings from identified FOPDT fits; back-calculation anti-windup on every loop; derivative only on SH (filtered); rate limits on speed; gain scheduling over load &amp; pressure ratio; high/low-select overrides (T₅ → spray/capacity, P₁ → N₁).</li>
+<li><b>L2 · Supervisory:</b> P<sub>int</sub> setpoint from the off-design COP map, superheat-setpoint adaptation, source-pump COP optimization (pumping power vs T<sub>e</sub> gain ≈ +2.5 %/K).</li>
+<li><b>L3 · Optional offset-free linear MPC</b> as a setpoint governor: 10-state linearized model (doc 08), T<sub>s</sub> = 2–5 s, prediction 60–120 samples, constraints = the envelope table; worth it under frequent large load swings, otherwise decentralized PID suffices.</li>
+</ul>
+<h3>Sequencing highlights</h3>
+<p class="small">Startup: evacuate &lt; 100 Pa → leak-rate hold → deaerated charge → water loops on → LP at minimum speed with feedforward valve opening →
+build P<sub>int</sub> → start HP → bumpless handover → ramp supply setpoint to 120 °C. Shutdown retains vacuum (isolation valves).
+Low-source mode replaces "defrost": reduced-capacity envelope with the freeze interlock, since sub-zero evaporation is impossible for water.</p>
+</section>
+
+<section id="dynamics">
+<h2>7 · Closed-loop step-response demo</h2>
+<p class="small muted">First-order-plus-dead-time plant G(s) = K·e<sup>−θs</sup>/(τs+1) under a PI controller with
+anti-windup (u clamped to ±3). Presets carry the qualitative dynamics of the three main loops from doc 08/09 —
+<b>placeholder parameters until the linearized model / plant identification delivers real ones</b>.
+Setpoint step at t = 0; input-side disturbance (−0.5) at 60 % of the horizon.</p>
+<div class="togglerow">
+  <button class="preset" data-p="supply">Supply temp ← speed</button>
+  <button class="preset" data-p="superheat">Superheat ← main valve</button>
+  <button class="preset" data-p="pint">P_int ← speed ratio</button>
+  <span id="dynDesc" class="small muted"></span>
+</div>
+<div class="controls">
+  <div class="ctl"><label>Controller gain K<sub>p</sub></label><div class="row"><input type="range" id="dKp" min="0.1" max="20" step="0.1" value="7.5"><output id="odKp"></output></div></div>
+  <div class="ctl"><label>Integral time T<sub>i</sub> (s)</label><div class="row"><input type="range" id="dTi" min="1" max="300" step="1" value="80"><output id="odTi"></output></div></div>
+  <div class="ctl"><label>Plant time constant τ (s)</label><div class="row"><input type="range" id="dTau" min="1" max="300" step="1" value="150"><output id="odTau"></output></div></div>
+  <div class="ctl"><label>Plant dead time θ (s)</label><div class="row"><input type="range" id="dTh" min="0" max="30" step="0.5" value="10"><output id="odTh"></output></div></div>
+</div>
+<figure>
+<div class="svgwrap"><svg id="dynsvg" viewBox="0 0 800 320" width="100%" style="max-width:800px"></svg></div>
+<figcaption id="dynCap"></figcaption>
+</figure>
+</section>
+
+<section id="prototype">
+<h2>8 · Prototype summary (50 kW laboratory unit)</h2>
+<p class="small muted">Full design in doc 10. Live values below update from the calculator.</p>
+<div class="tablewrap"><table>
+<tr><th>Item</th><th>Selection</th><th>Key number / reason</th></tr>
+<tr><td>Stage-1 compressor</td><td>Multi-wheel high-speed centrifugal steam-blower train (MVR practice)</td><td>Suction <span id="pv-v1" class="mono">–</span> at 1.228 kPa; per-wheel PR ≤ 2.5 (steam a ≈ 415 m/s) ⇒ 4–6 wheels</td></tr>
+<tr><td>Stage-2 compressor</td><td>Water-injected twin screw or 2-wheel centrifugal</td><td>Suction <span id="pv-v2" class="mono">–</span> at P<sub>int</sub>; oil-free, ≥ 300 °C rated</td></tr>
+<tr><td>Evaporator</td><td>Falling-film shell-and-tube + demister</td><td>Flooded pool ruled out: 0.1 m head ≈ 1 kPa ≈ 80 % of P₁; A ≈ 3–5 m²</td></tr>
+<tr><td>Condenser</td><td>Shell-and-tube / welded plate, 3-zone</td><td>Desuperheat ≈ 20 % of duty at gas-phase HTC; gasketed plate excluded (&gt; 150 °C)</td></tr>
+<tr><td>Main / injection valves</td><td>Steam-rated micro control valves, equal-%</td><td>K<sub>v</sub> ≈ 0.03 / 0.005; flashing-choked service; turndown ≥ 5:1</td></tr>
+<tr><td>Suction line</td><td>DN 300</td><td>≈ 18 m/s, ≈ 8 Pa/m — budget ≤ 100 Pa total (1.2 K penalty rule)</td></tr>
+<tr><td>Materials / vacuum</td><td>304/316L welded; graphite gaskets hot side</td><td>He-leak &lt; 10⁻⁶ mbar·L/s per joint; hold &lt; 50 Pa/h; permanent purge unit</td></tr>
+<tr><td>Instrumentation</td><td>Pt100 cl. A at states 1–11, absolute capacitance P at 3 levels, Coriolis on liquid lines, power meters</td><td>No vapor-side flow meters at 1 kPa — compressor-map soft sensor instead</td></tr>
+<tr><td>Control/DAQ</td><td>PLC (S7-1500/Beckhoff) or cRIO</td><td>100 ms fast loops, 1 s thermal, 1 Hz logging for model ID</td></tr>
+</table></div>
+<p class="small">Commissioning: Phase 0 integrity → Phase 1 first vapor → Phase 2 steady-state map
+(source {15, 20, 25 °C} × load {30–100 %} × P<sub>int</sub> sweep, acceptance ±8 % COP vs model) →
+Phase 3 step-test identification (feeds the FOPDT fits above) → Phase 4 closed-loop tuning and interlock proof.</p>
+</section>
+
+<section id="glossary">
+<h2>9 · Glossary &amp; references</h2>
+<div class="tablewrap"><table>
+<tr><th>Symbol</th><th>Meaning</th><th>Unit</th></tr>
+<tr><td>P, T, h, s, v, x</td><td>pressure, temperature, spec. enthalpy, spec. entropy, spec. volume, vapor quality</td><td>kPa, °C, kJ/kg, kJ/(kg·K), m³/kg, –</td></tr>
+<tr><td>ṁ<sub>e</sub>, ṁ<sub>inj</sub>, ṁ<sub>spray</sub>, ṁ<sub>c</sub></td><td>main, injection, spray, condenser-stream mass flow; ṁ<sub>c</sub> = ṁ<sub>e</sub>(1+r+w<sub>s</sub>)</td><td>kg/s</td></tr>
+<tr><td>r, w<sub>s</sub></td><td>injection ratio ṁ<sub>inj</sub>/ṁ<sub>e</sub>; spray ratio ṁ<sub>spray</sub>/ṁ<sub>e</sub></td><td>–</td></tr>
+<tr><td>η<sub>is</sub>, η<sub>vol</sub>, η<sub>drive</sub></td><td>isentropic, volumetric, drive-train efficiency</td><td>–</td></tr>
+<tr><td>SH, ΔT<sub>ec</sub>, ε<sub>rec</sub></td><td>superheat, economizer approach, recuperator effectiveness</td><td>K, K, –</td></tr>
+<tr><td>COP<sub>gas</sub> / COP<sub>el</sub></td><td>heat delivered per gas / electrical compression power (project quotes electrical)</td><td>–</td></tr>
+<tr><td>u<sub>mv</sub>, u<sub>iv</sub>, u<sub>spray</sub>, N₁, N₂</td><td>valve openings and compressor speeds (control inputs)</td><td>–, rev/s</td></tr>
+</table></div>
+<p class="small muted">References: IAPWS, <i>Revised Release on the Industrial Formulation 1997 for the Thermodynamic Properties of Water and Steam</i> (IF97), 2007 ·
+Skogestad, <i>Simple analytic rules for model reduction and PID controller tuning</i>, J. Process Control 13 (2003) ·
+Åström &amp; Hägglund, <i>Advanced PID Control</i>, ISA 2006 ·
+Chamoun, Rulliere, Haberschill, Peureux, <i>Experimental and numerical investigations of a new high-temperature heat pump using water as refrigerant</i>, Int. J. Refrigeration 44 (2014) ·
+IEA HPT Annex 58, <i>High-Temperature Heat Pumps</i>, task reports ·
+Incropera &amp; DeWitt, <i>Fundamentals of Heat and Mass Transfer</i> · project docs 01–10 in <code>../docs/</code>.</p>
+</section>
+
+<footer>R718 two-stage high-temperature heat pump · theoretical derivation &amp; prototype design companion ·
+self-contained page (IAPWS-IF97 subset implemented inline, no network access needed) · English project docs in <code>docs/</code>, original task in Chinese.</footer>
+</main>
+</div>
+<script>
+'use strict';
+/* ============================================================
+   IAPWS-IF97 subset: Region 4 (saturation), Region 2 (vapor),
+   Region 1 (liquid). p in MPa, T in K internally. R in kJ/(kg K).
+   Self-tested against the official IF97 verification tables.
+   ============================================================ */
+const RGAS = 0.461526;
+
+/* ---- Region 4: saturation line ---- */
+const N4 = [1167.0521452767, -724213.16703206, -17.073846940092, 12020.82470247,
+  -3232555.0322333, 14.91510861353, -4823.2657361591, 405113.40542057,
+  -0.23855557567849, 650.17534844798];
+function psatMPa(T) {
+  const th = T + N4[8] / (T - N4[9]);
+  const A = th * th + N4[0] * th + N4[1];
+  const B = N4[2] * th * th + N4[3] * th + N4[4];
+  const C = N4[5] * th * th + N4[6] * th + N4[7];
+  const x = 2 * C / (-B + Math.sqrt(B * B - 4 * A * C));
+  return Math.pow(x, 4);
+}
+function tsatK(p) {
+  const b = Math.pow(p, 0.25);
+  const E = b * b + N4[2] * b + N4[5];
+  const F = N4[0] * b * b + N4[3] * b + N4[6];
+  const G = N4[1] * b * b + N4[4] * b + N4[7];
+  const D = 2 * G / (-F - Math.sqrt(F * F - 4 * E * G));
+  return (N4[9] + D - Math.sqrt((N4[9] + D) * (N4[9] + D) - 4 * (N4[8] + N4[9] * D))) / 2;
+}
+
+/* ---- Region 2: superheated vapor. Gibbs g = g0 + gr; p* = 1 MPa, T* = 540 K ---- */
+const J0 = [0, 1, -5, -4, -3, -2, -1, 2, 3];
+const N0 = [-9.6927686500217, 10.086655968018, -0.005608791128302, 0.071452738081455,
+  -0.40710498223928, 1.4240819171444, -4.383951131945, -0.28408632460772, 0.021268463753307];
+const I2 = [1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,5,6,6,6,7,7,7,8,8,9,10,10,10,16,16,18,20,20,20,21,22,23,24,24,24];
+const J2 = [0,1,2,3,6,1,2,4,7,36,0,1,3,6,35,1,2,3,7,3,16,35,0,11,25,8,36,13,4,10,14,29,50,57,20,35,48,21,53,39,26,40,58];
+const N2R = [-0.0017731742473213, -0.017834862292358, -0.045996013696365, -0.057581259083432,
+  -0.05032527872793, -3.3032641670203e-5, -1.8948987516315e-4, -0.0039392777243355,
+  -0.043797295650573, -2.6674547914087e-5, 2.0481737692309e-8, 4.3870667284435e-7,
+  -3.227767723857e-5, -0.0015033924542148, -0.040668253562649, -7.8847309559367e-10,
+  1.2790717852285e-8, 4.8225372718507e-7, 2.2922076337661e-6, -1.6714766451061e-11,
+  -0.0021171472321355, -23.895741934104, -5.905956432427e-18, -1.2621808899101e-6,
+  -0.038946842435739, 1.1256211360459e-11, -8.2311340897998, 1.9809712802088e-8,
+  1.0406965210174e-19, -1.0234747095929e-13, -1.0018179379511e-9, -8.0882908646985e-11,
+  0.10693031879409, -0.33662250574171, 8.9185845355421e-25, 3.0629316876232e-13,
+  -4.2002467698208e-6, -5.9056029685639e-26, 3.7826947613457e-6, -1.2768608934681e-15,
+  7.3087610595061e-29, 5.5414715350778e-17, -9.436970724121e-7];
+function r2(T, p) { // T [K], p [MPa] -> {v,h,s,cp} (kJ, m3/kg basis)
+  const tau = 540 / T, pi = p;
+  let g0 = Math.log(pi), g0t = 0, g0tt = 0;
+  for (let i = 0; i < 9; i++) {
+    const J = J0[i], n = N0[i], tj = Math.pow(tau, J);
+    g0 += n * tj;
+    g0t += n * J * tj / tau;
+    g0tt += n * J * (J - 1) * tj / (tau * tau);
+  }
+  let dt = tau - 0.5;
+  if (dt === 0) dt = 1e-12;
+  let gr = 0, grp = 0, grt = 0, grtt = 0;
+  for (let i = 0; i < 43; i++) {
+    const I = I2[i], J = J2[i], n = N2R[i];
+    const pip = Math.pow(pi, I), dtj = Math.pow(dt, J);
+    const a = n * pip * dtj;
+    gr += a;
+    grp += a * I / pi;
+    grt += (J !== 0) ? a * J / dt : 0;
+    grtt += (J !== 0 && J !== 1) ? a * J * (J - 1) / (dt * dt) : 0;
+  }
+  const pkPa = p * 1000;
+  return {
+    v: RGAS * T / pkPa * (1 + pi * grp),
+    h: RGAS * T * tau * (g0t + grt),
+    s: RGAS * (tau * (g0t + grt) - (g0 + gr)),
+    cp: -RGAS * tau * tau * (g0tt + grtt)
+  };
+}
+
+/* ---- Region 1: compressed liquid. p* = 16.53 MPa, T* = 1386 K ---- */
+const I1 = [0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,3,3,3,4,4,4,5,8,8,21,23,29,30,31,32];
+const J1 = [-2,-1,0,1,2,3,4,5,-9,-7,-1,0,1,3,-3,0,1,3,17,-4,0,6,-5,-2,10,-8,-11,-6,-29,-31,-38,-39,-40,-41];
+const N1C = [0.14632971213167, -0.84548187169114, -3.756360367204, 3.3855169168385,
+  -0.95791963387872, 0.15772038513228, -0.016616417199501, 8.1214629983568e-4,
+  2.8319080123804e-4, -6.0706301565874e-4, -0.018990068218419, -0.032529748770505,
+  -0.021841717175414, -5.283835796993e-5, -4.7184321073267e-4, -3.0001780793026e-4,
+  4.7661393906987e-5, -4.4141845330846e-6, -7.2694996297594e-16, -3.1679644845054e-5,
+  -2.8270797985312e-6, -8.5205128120103e-10, -2.2425281908e-6, -6.5171222895601e-7,
+  -1.4341729937924e-13, -4.0516996860117e-7, -1.2734301741641e-9, -1.7424871230634e-10,
+  -6.8762131295531e-19, 1.4478307828521e-20, 2.6335781662795e-23, -1.1947622640071e-23,
+  1.8228094581404e-24, -9.3537087292458e-26];
+function r1(T, p) { // T [K], p [MPa] -> {v,h,s,cp}
+  const pi = p / 16.53, tau = 1386 / T;
+  const a = 7.1 - pi, b = tau - 1.222;
+  let g = 0, gp = 0, gt = 0, gtt = 0;
+  for (let i = 0; i < 34; i++) {
+    const I = I1[i], J = J1[i], n = N1C[i];
+    const ai = Math.pow(a, I), bj = Math.pow(b, J);
+    g += n * ai * bj;
+    gp += (I !== 0) ? -n * I * ai / a * bj : 0;
+    gt += (J !== 0) ? n * ai * J * bj / b : 0;
+    gtt += (J !== 0 && J !== 1) ? n * ai * J * (J - 1) * bj / (b * b) : 0;
+  }
+  const pkPa = p * 1000;
+  return {
+    v: RGAS * T / pkPa * pi * gp,
+    h: RGAS * T * tau * gt,
+    s: RGAS * (tau * gt - g),
+    cp: -RGAS * tau * tau * gtt
+  };
+}
+
+/* ---- inversions (safeguarded bisection; monotone in T) ---- */
+function invT2(p, target, prop, lo, hi) {
+  let flo = r2(lo, p)[prop] - target;
+  if (flo > 0) return lo; // clamp at saturation boundary
+  for (let i = 0; i < 70; i++) {
+    const mid = 0.5 * (lo + hi);
+    ((r2(mid, p)[prop] - target) < 0) ? lo = mid : hi = mid;
+  }
+  return 0.5 * (lo + hi);
+}
+function invT1h(p, target, lo, hi) {
+  for (let i = 0; i < 60; i++) {
+    const mid = 0.5 * (lo + hi);
+    ((r1(mid, p).h - target) < 0) ? lo = mid : hi = mid;
+  }
+  return 0.5 * (lo + hi);
+}
+
+/* ---- IF97 self-test (official verification tables) ---- */
+function selfTest() {
+  const tests = [
+    ['R4 psat(300K)', psatMPa(300), 0.00353658941],
+    ['R4 psat(500K)', psatMPa(500), 2.63889776],
+    ['R4 psat(600K)', psatMPa(600), 12.3443146],
+    ['R4 Tsat(0.1MPa)', tsatK(0.1), 372.755919],
+    ['R4 Tsat(1MPa)', tsatK(1), 453.035632],
+    ['R4 Tsat(10MPa)', tsatK(10), 584.149488],
+    ['R2 v(300K,3.5kPa)', r2(300, 0.0035).v, 39.4913866],
+    ['R2 h(300K,3.5kPa)', r2(300, 0.0035).h, 2549.91145],
+    ['R2 s(300K,3.5kPa)', r2(300, 0.0035).s, 8.52238967],
+    ['R2 h(700K,3.5kPa)', r2(700, 0.0035).h, 3335.68375],
+    ['R2 s(700K,30MPa)', r2(700, 30).s, 5.17540298],
+    ['R1 v(300K,3MPa)', r1(300, 3).v, 0.00100215168],
+    ['R1 h(300K,3MPa)', r1(300, 3).h, 115.331273],
+    ['R1 s(300K,3MPa)', r1(300, 3).s, 0.392294792],
+    ['R1 h(500K,3MPa)', r1(500, 3).h, 975.542239]
+  ];
+  let pass = 0; const rows = [];
+  for (const [name, got, ref] of tests) {
+    const rel = Math.abs(got / ref - 1);
+    const ok = rel < 1e-6;
+    if (ok) pass++;
+    rows.push({ test: name, got, ref, relErr: rel.toExponential(2), ok });
+  }
+  if (window.console && console.table) console.table(rows);
+  const badge = document.getElementById('selftest');
+  if (pass === tests.length) {
+    badge.textContent = 'IF97 self-test ' + pass + '/' + tests.length + ' ✓';
+    badge.classList.add('ok');
+  } else {
+    badge.textContent = 'IF97 self-test ' + pass + '/' + tests.length + ' ✗ (see console)';
+    badge.classList.add('fail');
+  }
+  return pass === tests.length;
+}
+
+/* ============================================================
+   Cycle solver — sequential design-mode march (doc 06 §6.7)
+   ============================================================ */
+function solveCycle(inp) {
+  const TeK = inp.Te + 273.15, TcK = inp.Tc + 273.15;
+  const P1 = psatMPa(TeK), P4 = psatMPa(TcK), Pi = inp.PintkPa / 1000;
+  const notes = [];
+  if (Pi <= P1 * 1.05 || Pi >= P4 * 0.95) notes.push('P_int must lie between P1 and P4 — value clamped.');
+  const Pint = Math.min(Math.max(Pi, P1 * 1.05), P4 * 0.95);
+  const TsatI = tsatK(Pint);
+
+  // saturation properties
+  const fE = r1(TeK, P1), gE = r2(TeK, P1);
+  const hfE = fE.h, hgE = gE.h, hfgE = hgE - hfE, sfE = fE.s, sgE = gE.s, vfE = fE.v, vgE = gE.v;
+  const fI = r1(TsatI, Pint), gI = r2(TsatI, Pint);
+  const fC = r1(TcK, P4);
+
+  // state 1: evaporator exit (superheated by dTsh)
+  const T1K = TeK + Math.max(inp.dTsh, 0.01);
+  const st1 = r2(T1K, P1);
+
+  // condensate & economizer liquid chain
+  const h6 = fC.h;
+  let T7K, h7;
+  if (inp.eco) {
+    T7K = Math.min(TsatI + inp.dTec, TcK);
+    h7 = r1(T7K, P4).h;
+  } else { T7K = TcK; h7 = h6; }
+  const h10 = gI.h; // saturated injection vapor
+
+  // recuperator (both sides m_e; split upstream at 7)
+  const qrec = Math.max(0, inp.epsRec * st1.cp * (T7K - T1K));
+  const h1 = st1.h, h2 = h1 + qrec;
+  const T2K = invT2(P1, h2, 'h', T1K - 0.5, 1500);
+  const s2 = r2(T2K, P1).s;
+
+  // compressor 1
+  const T3sK = invT2(Pint, s2, 's', TsatI, 2000);
+  const h3s = r2(T3sK, Pint).h;
+  const h3 = h2 + (h3s - h2) / inp.eta1;
+  const T3K = invT2(Pint, h3, 'h', TsatI, 2200);
+
+  // injection ratio r and spray ratio ws (doc 05 §5.5, linear coupled solve)
+  let r = 0, ws = 0, h4, T4K;
+  const sprayOn = inp.spray;
+  if (sprayOn) {
+    const T4tK = TsatI + inp.dTspray;
+    const h4t = r2(T4tK, Pint).h;
+    const a = (h4t - h3) / (h7 - h4t);
+    const b = (h4t - h10) / (h7 - h4t);
+    if (inp.eco) {
+      r = ((1 + a) * (h6 - h7)) / ((h10 - h7) - (1 + b) * (h6 - h7));
+      ws = a + b * r;
+    } else { r = 0; ws = a; }
+    if (r < 0 || ws < 0 || !isFinite(r) || !isFinite(ws)) {
+      notes.push('Spray/injection solve degenerate at these settings — spray disabled for this point.');
+      r = inp.eco ? (h6 - h7) / (h10 - h6) : 0; ws = 0;
+      h4 = (h3 + r * h10) / (1 + r);
+      T4K = invT2(Pint, h4, 'h', TsatI, 2200);
+    } else { h4 = h4t; T4K = T4tK; }
+  } else {
+    r = inp.eco ? (h6 - h7) / (h10 - h6) : 0;
+    ws = 0;
+    h4 = (h3 + r * h10) / (1 + r);
+    T4K = invT2(Pint, h4, 'h', TsatI, 2200);
+  }
+  const F = 1 + r + ws;
+
+  // compressor 2
+  const s4 = r2(T4K, Pint).s;
+  const T5sK = invT2(P4, s4, 's', TcK, 2400);
+  const h5s = r2(T5sK, P4).h;
+  const h5 = h4 + (h5s - h4) / inp.eta2;
+  const T5K = invT2(P4, h5, 'h', TcK, 2600);
+
+  // liquid tail
+  const h8 = h7 - qrec;
+  const T8K = invT1h(P4, h8, 273.16, T7K + 0.01);
+  const h11 = h8;
+  const x11 = (h11 - hfE) / hfgE;
+
+  // flows (design mode: Q specified)
+  const Q = inp.Q;
+  const mc = Q / (h5 - h6);
+  const me = mc / F;
+  const minj = r * me, mspray = ws * me;
+
+  // energies
+  const W1 = me * (h3 - h2);
+  const W2 = mc * (h5 - h4);
+  const Qevap = me * (h1 - h11);
+  const closure = (Q - Qevap - W1 - W2) / Q;
+  const COPgas = Q / (W1 + W2);
+  const COPel = COPgas * inp.etaDrive;
+  const carnot = TcK / (TcK - TeK);
+
+  // state records for table + diagrams
+  const x9 = inp.eco ? Math.min(Math.max((h7 - fI.h) / (gI.h - fI.h), 0), 1) : 0;
+  const st = {};
+  const put = (id, name, TK, PMPa, h, s, v, m) =>
+    st[id] = { id, name, T: TK - 273.15, P: PMPa * 1000, h, s, v, m };
+  const r2at = (TK, p) => r2(TK, p);
+  put(1, 'Evaporator out', T1K, P1, h1, st1.s, st1.v, me);
+  put(2, 'LP suction (post-recup)', T2K, P1, h2, s2, r2at(T2K, P1).v, me);
+  put(3, 'LP discharge', T3K, Pint, h3, r2at(T3K, Pint).s, r2at(T3K, Pint).v, me);
+  put(4, 'HP suction (post mix' + (ws > 0 ? '+spray' : '') + ')', T4K, Pint, h4, s4, r2at(T4K, Pint).v, mc);
+  put(5, 'HP discharge', T5K, P4, h5, r2at(T5K, P4).s, r2at(T5K, P4).v, mc);
+  put(6, 'Condenser liquid out', TcK, P4, h6, fC.s, fC.v, mc);
+  put(7, 'Economizer out / tap', T7K, P4, h7, r1(T7K, P4).s, r1(T7K, P4).v, mc);
+  put(8, 'Recuperator hot out', T8K, P4, h8, r1(T8K, P4).s, r1(T8K, P4).v, me);
+  if (inp.eco) {
+    put(9, 'Secondary valve out', TsatI, Pint, h7, fI.s + x9 * (gI.s - fI.s), fI.v + x9 * (gI.v - fI.v), minj);
+    put(10, 'Injection vapor', TsatI, Pint, h10, gI.s, gI.v, minj);
+  }
+  put(11, 'Evaporator in (flash)', TeK, P1, h11, sfE + x11 * (sgE - sfE), vfE + x11 * (vgE - vfE), me);
+
+  return {
+    inp, st, notes, P1: P1 * 1000, P4: P4 * 1000, Pint: Pint * 1000,
+    TsatI: TsatI - 273.15, r, ws, F, me, mc, minj, mspray,
+    W1, W2, Qevap, Q, closure, COPgas, COPel, carnot, etaII: COPel / carnot,
+    PR1: Pint / P1, PR2: P4 / Pint, PRtot: P4 / P1,
+    T3: T3K - 273.15, T5: T5K - 273.15, x11,
+    V1: me * r2at(T2K, P1).v, V2: mc * r2at(T4K, Pint).v,
+    x9, qrec, sprayActive: ws > 0
+  };
+}
+
+/* ============================================================
+   UI wiring
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const fmt = (x, d) => (x === undefined || !isFinite(x)) ? '–' : x.toFixed(d);
+const DEFAULTS = { inTe: 10, inTc: 125, inPi: 17, inQ: 50, inE1: 0.70, inE2: 0.70, inSH: 3, inER: 0.15, inDTec: 5, inED: 0.88 };
+const SLIDERS = ['inTe','inTc','inPi','inQ','inE1','inE2','inSH','inER','inDTec','inED'];
+const UNITS = { inTe:' °C', inTc:' °C', inPi:' kPa', inQ:' kW', inE1:'', inE2:'', inSH:' K', inER:'', inDTec:' K', inED:'' };
+
+function readInputs() {
+  return {
+    Te: +$('inTe').value, Tc: +$('inTc').value, PintkPa: +$('inPi').value,
+    Q: +$('inQ').value, eta1: +$('inE1').value, eta2: +$('inE2').value,
+    dTsh: +$('inSH').value, epsRec: +$('inER').value, dTec: +$('inDTec').value,
+    etaDrive: +$('inED').value,
+    eco: $('inEco').checked, spray: $('inSpray').checked, dTspray: 15
+  };
+}
+function showOutputs() {
+  for (const id of SLIDERS) $(id.replace('in', 'out')).textContent = $(id).value + UNITS[id];
+}
+
+let RES = null;
+function recalc() {
+  showOutputs();
+  const inp = readInputs();
+  try { RES = solveCycle(inp); } catch (e) {
+    $('warnings').innerHTML = '<div class="warnbox bad">Solver error: ' + e.message + '</div>';
+    return;
+  }
+  renderWarnings(RES); renderKPIs(RES); renderTable(RES); renderSchematic(RES); drawTS(RES);
+}
+let deb = null;
+const recalcDeb = () => { clearTimeout(deb); deb = setTimeout(recalc, 60); };
+
+function renderWarnings(R) {
+  const w = [];
+  if (R.inp.Tc < 123) w.push(['bad', 'T<sub>c</sub> = ' + R.inp.Tc + ' °C cannot heat process water to 120 °C with a ≥ 3 K pinch — supply spec violated (doc 04 §4.2.3).']);
+  if (R.T3 > 300) w.push(['', 'Stage-1 discharge T₃ = ' + fmt(R.T3, 0) + ' °C — above ~300 °C continuous rating; recuperator ε and superheat drive this (doc 04 §4.5).']);
+  if (R.T5 > 550) w.push(['bad', 'Stage-2 discharge T₅ = ' + fmt(R.T5, 0) + ' °C — beyond material limits; increase spray (lower target), lower T_c, or raise η_is.']);
+  else if (R.T5 > 300) w.push(['', 'Stage-2 discharge T₅ = ' + fmt(R.T5, 0) + ' °C — needs the condenser desuperheat zone and high-T₅ override (docs 04, 09).']);
+  if (!R.sprayActive && R.inp.spray === false) w.push(['', 'Interstage spray off: T₄ = ' + fmt(R.st[4].T, 0) + ' °C — vapor injection alone cools only ~30 K (doc 05 §5.4).']);
+  if (R.T5 > 800 || R.T3 > 800) w.push(['bad', 'State beyond IF97 Region-2 validity (800 °C) — extrapolated properties, indicative only.']);
+  if (R.inp.Te <= 3) w.push(['', 'T<sub>e</sub> near the triple point (0.01 °C / 611 Pa) — freeze-protection envelope applies (doc 09 §9.6).']);
+  for (const n of R.notes) w.push(['bad', n]);
+  $('warnings').innerHTML = w.map(([c, t]) => '<div class="warnbox ' + c + '">' + t + '</div>').join('');
+}
+
+function renderKPIs(R) {
+  const chips = [
+    ['COP (electrical)', fmt(R.COPel, 2), 'gas ' + fmt(R.COPgas, 2) + ' × η_drive ' + R.inp.etaDrive, R.COPel > R.carnot ? 'bad' : 'good'],
+    ['% of Carnot', fmt(100 * R.etaII, 0) + ' %', 'Carnot = ' + fmt(R.carnot, 2), ''],
+    ['Q̇_evap', fmt(R.Qevap, 1) + ' kW', 'source side', ''],
+    ['Ẇ gas total', fmt(R.W1 + R.W2, 1) + ' kW', 'W₁ ' + fmt(R.W1, 1) + ' + W₂ ' + fmt(R.W2, 1), ''],
+    ['Pressure ratios', fmt(R.PR1, 1) + ' / ' + fmt(R.PR2, 1), 'overall ' + fmt(R.PRtot, 0), ''],
+    ['T₃ / T₅', fmt(R.T3, 0) + ' / ' + fmt(R.T5, 0) + ' °C', 'discharge temps', (R.T5 > 550 ? 'bad' : R.T5 > 300 ? 'warn' : '')],
+    ['V̇ suction 1', fmt(R.V1, 2) + ' m³/s', fmt(R.V1 * 3600, 0) + ' m³/h @ ' + fmt(R.P1, 2) + ' kPa', ''],
+    ['V̇ suction 2', fmt(R.V2, 3) + ' m³/s', '@ P_int ' + fmt(R.Pint, 1) + ' kPa', ''],
+    ['r / w_s', fmt(R.r, 3) + ' / ' + fmt(R.ws, 3), 'injection / spray ratio', ''],
+    ['x₁₁ flash', fmt(R.x11, 3), 'vapor mass fraction at evap inlet', ''],
+    ['Energy closure', fmt(100 * Math.abs(R.closure), 3) + ' %', 'Q̇c − Q̇e − ΣẆ (should be ≈ 0)', Math.abs(R.closure) < 0.005 ? 'good' : 'bad']
+  ];
+  $('kpis').innerHTML = chips.map(([k, v, u, c]) =>
+    '<div class="chip ' + c + '"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="u">' + u + '</div></div>').join('');
+}
+
+function renderTable(R) {
+  const order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  const rows = order.map(i => {
+    const s = R.st[i];
+    if (!s) return '<tr data-st="' + i + '"><td>' + i + '</td><td class="muted">— economizer off —</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>';
+    return '<tr data-st="' + i + '"><td>' + i + '</td><td>' + s.name + '</td><td>' + fmt(s.T, 1) + '</td><td>' +
+      (s.P < 10 ? fmt(s.P, 3) : fmt(s.P, 1)) + '</td><td>' + fmt(s.h, 1) + '</td><td>' + fmt(s.s, 3) + '</td><td>' +
+      (s.v > 1 ? fmt(s.v, 2) : s.v > 0.01 ? fmt(s.v, 4) : s.v.toExponential(3)) + '</td><td>' + fmt(s.m, 4) + '</td></tr>';
+  });
+  $('stateTable').querySelector('tbody').innerHTML = rows.join('');
+  const mw = R.Q / (4.19 * 5);
+  $('flowline').innerHTML = 'Flows: ṁ<sub>e</sub> = ' + fmt(R.me, 4) + ' kg/s · ṁ<sub>inj</sub> = ' + fmt(R.minj, 4) +
+    ' · ṁ<sub>spray</sub> = ' + fmt(R.mspray, 4) + ' · ṁ<sub>c</sub> = ' + fmt(R.mc, 4) +
+    ' kg/s · process water ≈ ' + fmt(mw, 2) + ' kg/s (115→120 °C) · spray branch taps at state 7.';
+}
+
+function renderSchematic(R) {
+  const lab = (i, s) => {
+    const el = $('sv' + i);
+    if (!el) return;
+    el.textContent = s ? (fmt(s.T, 0) + '°C · ' + (s.P < 10 ? fmt(s.P, 2) : fmt(s.P, 0)) + 'kPa') : 'off';
+  };
+  for (let i = 1; i <= 11; i++) lab(i, R.st[i]);
+  $('sprayline').style.display = R.sprayActive ? '' : 'none';
+}
+
+/* ---- schematic hover <-> table row ---- */
+document.addEventListener('mouseover', e => {
+  const g = e.target.closest('.sp');
+  const tr = e.target.closest('#stateTable tbody tr');
+  document.querySelectorAll('#stateTable tbody tr.hl').forEach(x => x.classList.remove('hl'));
+  document.querySelectorAll('.sp.hl').forEach(x => x.classList.remove('hl'));
+  if (g) {
+    const st = g.dataset.st;
+    const row = document.querySelector('#stateTable tbody tr[data-st="' + st + '"]');
+    if (row) row.classList.add('hl');
+  } else if (tr) {
+    const st = tr.dataset.st;
+    const gg = document.querySelector('.sp[data-st="' + st + '"]');
+    if (gg) gg.classList.add('hl');
+    tr.classList.add('hl');
+  }
+});
+
+/* ============================================================
+   T-s diagram
+   ============================================================ */
+let DOME = null;
+function buildDome() {
+  const pts = [];
+  for (let t = 0.5; t <= 350; t += (t < 340 ? 2.5 : 1)) {
+    const TK = t + 273.15, p = psatMPa(TK);
+    pts.push({ T: t, sf: r1(TK, p).s, sg: r2(TK, p).s });
+  }
+  pts.push({ T: 373.946, sf: 4.412, sg: 4.412 }); // critical closure (R3 region approximated)
+  DOME = pts;
+}
+function drawTS(R) {
+  if (!DOME) buildDome();
+  const svg = $('tssvg');
+  const W = 800, H = 470, L = 62, Rm = 16, Tm = 18, Bm = 46;
+  const Tmax = Math.max(450, Math.ceil((Math.max(R.T5, R.T3) + 40) / 50) * 50);
+  const Smax = 10, Smin = 0;
+  const X = s => L + (s - Smin) / (Smax - Smin) * (W - L - Rm);
+  const Y = T => Tm + (1 - T / Tmax) * (H - Tm - Bm);
+  let g = '';
+  // grid + axes
+  for (let T = 0; T <= Tmax; T += 50)
+    g += '<line x1="' + L + '" y1="' + Y(T) + '" x2="' + (W - Rm) + '" y2="' + Y(T) + '" stroke="var(--line)" stroke-width="0.6"/>' +
+         '<text x="' + (L - 8) + '" y="' + (Y(T) + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + T + '</text>';
+  for (let s = 0; s <= Smax; s += 1)
+    g += '<line x1="' + X(s) + '" y1="' + Tm + '" x2="' + X(s) + '" y2="' + (H - Bm) + '" stroke="var(--line)" stroke-width="0.6"/>' +
+         '<text x="' + X(s) + '" y="' + (H - Bm + 16) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + s + '</text>';
+  g += '<text x="' + ((L + W - Rm) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="12" fill="var(--muted)">specific entropy s [kJ/(kg·K)]</text>';
+  g += '<text x="16" y="' + ((Tm + H - Bm) / 2) + '" font-size="12" fill="var(--muted)" transform="rotate(-90 16 ' + ((Tm + H - Bm) / 2) + ')" text-anchor="middle">temperature T [°C]</text>';
+  // dome
+  const dome = DOME.map(p => X(p.sf) + ',' + Y(p.T)).join(' ') + ' ' +
+    [...DOME].reverse().map(p => X(p.sg) + ',' + Y(p.T)).join(' ');
+  g += '<polygon points="' + dome + '" fill="var(--domefill)" stroke="var(--muted)" stroke-width="1.2"/>';
+  // condensation kink point: saturated vapor at Tc
+  const TcK = R.inp.Tc + 273.15;
+  const sgTc = r2(TcK, psatMPa(TcK)).s;
+  const P = i => R.st[i];
+  const pt = s => X(s.s) + ',' + Y(s.T);
+  // main cycle
+  const main = [P(11), P(1), P(2), P(3), P(4), P(5), { s: sgTc, T: R.inp.Tc }, P(6), P(7), P(8), P(11)];
+  g += '<polyline points="' + main.map(pt).join(' ') + '" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round"/>';
+  // injection branch
+  if (P(9) && P(10))
+    g += '<polyline points="' + [P(7), P(9), P(10), P(4)].map(pt).join(' ') + '" fill="none" stroke="var(--accent2)" stroke-width="1.6" stroke-dasharray="6 4"/>';
+  if (R.sprayActive)
+    g += '<polyline points="' + [P(7), P(4)].map(pt).join(' ') + '" fill="none" stroke="var(--accent2)" stroke-width="1.1" stroke-dasharray="2 4"/>';
+  // points + labels
+  const offs = { 1: [8, 12], 2: [8, 2], 3: [8, 2], 4: [8, -4], 5: [8, 2], 6: [-16, 14], 7: [-18, 4], 8: [-18, 4], 9: [-6, 16], 10: [6, 16], 11: [-6, 16] };
+  for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+    const s = P(i); if (!s) continue;
+    const [dx, dy] = offs[i] || [8, 2];
+    g += '<circle cx="' + X(s.s) + '" cy="' + Y(s.T) + '" r="3.4" fill="var(--panel)" stroke="var(--accent2)" stroke-width="1.6"/>' +
+      '<text x="' + (X(s.s) + dx) + '" y="' + (Y(s.T) + dy) + '" font-size="11.5" font-weight="600" fill="var(--ink)">' + i + '</text>';
+  }
+  svg.innerHTML = g;
+}
+
+/* ============================================================
+   Dynamics demo: FOPDT + PI, Euler with dead-time buffer
+   ============================================================ */
+const PRESETS = {
+  supply: { Kp: 7.5, Ti: 80, tau: 150, th: 10, name: 'Supply temperature ← compressor speed',
+    desc: 'Slow thermal loop (HX metal + water masses). SIMC start: Kp = τ/(2Kθ), Ti = min(τ, 8θ).' },
+  superheat: { Kp: 2.5, Ti: 12, tau: 12, th: 2, name: 'Evaporator superheat ← main valve',
+    desc: 'Fast loop; watch for inverse response (RHP zero) in the real plant — keep derivative off.' },
+  pint: { Kp: 2.5, Ti: 5, tau: 5, th: 1, name: 'Intermediate-pressure placement ← speed ratio',
+    desc: 'Fast pressure-storage loop; P_int itself is emergent, the ratio trim steers it.' }
+};
+function simDyn() {
+  const Kp = +$('dKp').value, Ti = +$('dTi').value, tau = +$('dTau').value, th = +$('dTh').value;
+  $('odKp').textContent = Kp; $('odTi').textContent = Ti + ' s'; $('odTau').textContent = tau + ' s'; $('odTh').textContent = th + ' s';
+  const K = 1, tEnd = Math.min(1500, Math.max(60, 9 * (tau + th)));
+  const n = 3000, dt = tEnd / n, dSteps = Math.max(0, Math.round(th / dt));
+  const buf = new Array(dSteps + 1).fill(0);
+  let y = 0, I = 0, bi = 0;
+  const ys = [], us = [];
+  for (let k = 0; k <= n; k++) {
+    const t = k * dt;
+    const sp = 1, dist = (t > 0.6 * tEnd) ? -0.5 : 0;
+    const e = sp - y;
+    let u = Kp * e + I;
+    const uSat = Math.max(-3, Math.min(3, u));
+    // conditional integration anti-windup
+    if (u === uSat || (e * (Kp / Ti)) * (u - uSat) < 0) I += Kp / Ti * e * dt;
+    u = uSat;
+    // dead-time buffer
+    buf[bi] = u + dist;
+    bi = (bi + 1) % (dSteps + 1);
+    const uDel = buf[bi];
+    y += dt * (-y + K * uDel) / tau;
+    ys.push([t, y]); us.push([t, u]);
+  }
+  drawDyn(ys, us, tEnd);
+}
+function drawDyn(ys, us, tEnd) {
+  const svg = $('dynsvg');
+  const W = 800, H = 320, L = 52, Rm = 14, Tm = 12, Bm = 40;
+  let ymin = -0.2, ymax = 1.6;
+  for (const [, y] of ys) { ymin = Math.min(ymin, y - 0.05); ymax = Math.max(ymax, y + 0.05); }
+  const X = t => L + t / tEnd * (W - L - Rm);
+  const Y = v => Tm + (ymax - v) / (ymax - ymin) * (H - Tm - Bm);
+  let g = '';
+  for (let v = Math.ceil(ymin * 2) / 2; v <= ymax; v += 0.5)
+    g += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + (W - Rm) + '" y2="' + Y(v) + '" stroke="var(--line)" stroke-width="0.6"/>' +
+      '<text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + v.toFixed(1) + '</text>';
+  const tick = tEnd > 600 ? 200 : tEnd > 240 ? 100 : tEnd > 100 ? 50 : 20;
+  for (let t = 0; t <= tEnd; t += tick)
+    g += '<text x="' + X(t) + '" y="' + (H - Bm + 16) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + t + '</text>';
+  g += '<text x="' + ((L + W) / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--muted)">time [s] — setpoint step at 0, −0.5 input disturbance at ' + Math.round(0.6 * tEnd) + ' s</text>';
+  g += '<line x1="' + L + '" y1="' + Y(1) + '" x2="' + (W - Rm) + '" y2="' + Y(1) + '" stroke="var(--muted)" stroke-dasharray="5 4" stroke-width="1"/>';
+  const path = pts => pts.map(([t, v], i) => (i ? 'L' : 'M') + X(t).toFixed(1) + ' ' + Y(v).toFixed(1)).join(' ');
+  g += '<path d="' + path(us) + '" fill="none" stroke="var(--accent2)" stroke-width="1.2" opacity="0.75"/>';
+  g += '<path d="' + path(ys) + '" fill="none" stroke="var(--accent)" stroke-width="2.2"/>';
+  g += '<text x="' + (W - Rm - 4) + '" y="' + (Tm + 14) + '" text-anchor="end" font-size="11.5" fill="var(--accent)">y(t) output</text>';
+  g += '<text x="' + (W - Rm - 4) + '" y="' + (Tm + 30) + '" text-anchor="end" font-size="11.5" fill="var(--accent2)">u(t) controller</text>';
+  svg.innerHTML = g;
+}
+function loadPreset(p) {
+  const P = PRESETS[p];
+  $('dKp').value = P.Kp; $('dTi').value = P.Ti; $('dTau').value = P.tau; $('dTh').value = P.th;
+  $('dynDesc').textContent = P.name + ' — ' + P.desc;
+  $('dynCap').textContent = 'Normalized closed-loop response, plant G(s)=e^{-θs}/(τs+1), PI with anti-windup. Parameters are illustrative until plant identification (doc 10, Phase 3).';
+  simDyn();
+}
+
+/* ============================================================
+   Theme, scroll-spy, init
+   ============================================================ */
+function initTheme() {
+  const stored = localStorage.getItem('htp-theme');
+  const dark = stored ? stored === 'dark' : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  $('themeBtn').addEventListener('click', () => {
+    const nowDark = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = nowDark ? 'dark' : 'light';
+    localStorage.setItem('htp-theme', nowDark ? 'dark' : 'light');
+  });
+  let preTheme = null;
+  window.addEventListener('beforeprint', () => { preTheme = document.documentElement.dataset.theme; document.documentElement.dataset.theme = 'light'; });
+  window.addEventListener('afterprint', () => { if (preTheme) document.documentElement.dataset.theme = preTheme; });
+}
+function initSpy() {
+  const links = [...document.querySelectorAll('#sidebar a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const obs = new IntersectionObserver(es => {
+    for (const e of es) if (e.isIntersecting) {
+      links.forEach(a => a.classList.remove('active'));
+      const a = map.get(e.target.id); if (a) a.classList.add('active');
+    }
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('main section').forEach(s => obs.observe(s));
+}
+function init() {
+  selfTest();
+  for (const id of SLIDERS) $(id).addEventListener('input', recalcDeb);
+  $('inEco').addEventListener('change', recalc);
+  $('inSpray').addEventListener('change', recalc);
+  $('btnGeo').addEventListener('click', () => {
+    const P1 = psatMPa(+$('inTe').value + 273.15) * 1000, P4 = psatMPa(+$('inTc').value + 273.15) * 1000;
+    $('inPi').value = (Math.sqrt(P1 * P4)).toFixed(1);
+    recalc();
+  });
+  $('btnReset').addEventListener('click', () => {
+    for (const [id, v] of Object.entries(DEFAULTS)) $(id).value = v;
+    $('inEco').checked = true; $('inSpray').checked = true;
+    recalc();
+  });
+  for (const b of document.querySelectorAll('.preset')) b.addEventListener('click', () => loadPreset(b.dataset.p));
+  for (const id of ['dKp', 'dTi', 'dTau', 'dTh']) $(id).addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(simDyn, 60); });
+  initTheme(); initSpy();
+  recalc();
+  loadPreset('supply');
+  // prototype live spans
+  if (RES) {
+    $('pv-v1').textContent = fmt(RES.V1, 2) + ' m³/s (' + fmt(RES.V1 * 3600, 0) + ' m³/h)';
+    $('pv-v2').textContent = fmt(RES.V2, 3) + ' m³/s';
+  }
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
